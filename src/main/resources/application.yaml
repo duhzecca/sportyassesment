@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+aviation-api:
+    base-url: https://api.aviationapi.com/v1
+    timeout-ms: 2000
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      aviation:
+        slidingWindowSize: 20
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 15s
+  retry:
+    instances:
+      aviation:
+        maxAttempts: 3
+        waitDuration: 200ms
+        retryExceptions:
+          - feign.RetryableException
+          - java.io.IOException
+  ratelimiter:
+    instances:
+      outbound-aviation:
+        limitForPeriod: 5
+        limitRefreshPeriod: 1s
